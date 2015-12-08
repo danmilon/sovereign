@@ -1,0 +1,3 @@
+---
+dependencies:
+  - { role: ssl-lets-encrypt, ssl_domain: "{{ wallabag_domain }}", on_renew: "systemctl reload apache2" }

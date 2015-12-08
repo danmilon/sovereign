@@ -6,6 +6,8 @@
 
 # # common
 common_timezone: 'Etc/UTC'
+# set productio here https://acme-v01.api.letsencrypt.org/directory before merge
+lets_encrypt_server: https://acme-staging.api.letsencrypt.org/directory
 # domain: (required)
 # main_user_name: (required)
 admin_email: "{{ main_user_name }}@{{ domain }}"

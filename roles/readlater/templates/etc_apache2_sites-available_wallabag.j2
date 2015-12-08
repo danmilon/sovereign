@@ -1,13 +1,11 @@
-<VirtualHost *:80>
-    ServerName {{ wallabag_domain }}
-
-    Redirect permanent / https://{{ wallabag_domain }}/
-</VirtualHost>
-
 <VirtualHost *:443>
     ServerName {{ wallabag_domain }}
 
     Include /etc/apache2/ssl.conf
+    Include /etc/apache2/ssl.conf
+    SSLCertificateKeyFile /etc/ssl/lets-encrypt/{{ wallabag_domain }}/key.pem
+    SSLCertificateFile /etc/ssl/lets-encrypt/{{ wallabag_domain }}/cert.pem
+    SSLCertificateChainFile /etc/ssl/lets-encrypt/{{ wallabag_domain }}/chain.pem
 
     DocumentRoot            /var/www/wallabag
     Options                 -Indexes

@@ -1,0 +1,48 @@
+- name: set up apache vhost for acme challenges
+  template:
+    src=apache-vhost-acme.j2
+    dest="/etc/apache2/sites-available/{{ ssl_domain }}_acme.conf"
+    group=root
+    owner=root
+
+- name: enable apache vhost for acme challenges
+  command: "a2ensite {{ ssl_domain }}_acme.conf creates=/etc/apache2/sites-enabled/{{ ssl_domain }}_acme.conf"
+
+- name: create acme challenges document root
+  file:
+    path="/var/www/acme-challenge/{{ ssl_domain }}"
+    owner=ssl-cert
+    group=ssl-cert
+    state=directory
+
+- name: create folder for output
+  file:
+    path="/etc/ssl/lets-encrypt/{{ ssl_domain }}"
+    owner=ssl-cert
+    group=ssl-cert
+    state=directory
+
+- name: create the certs for the first time
+  shell: "systemctl restart apache2 && sudo -u ssl-cert simp_le -d {{ ssl_domain }}:/var/www/acme-challenge/{{ ssl_domain }} -f account_key.json -f key.pem -f cert.pem -f chain.pem --server {{ lets_encrypt_server }} {% if on_renew %}&& {{ on_renew }}{% endif %}"
+  args:
+    chdir: "/etc/ssl/lets-encrypt/{{ ssl_domain }}"
+    creates: "/etc/ssl/lets-encrypt/{{ ssl_domain }}/cert.pem"
+
+# can be removed when following issues are solved
+# see https://github.com/kuba/simp_le/issues/29
+# see https://github.com/kuba/simp_le/pull/34
+- name: fix permissions of private key
+  file:
+    path="/etc/ssl/lets-encrypt/{{ ssl_domain }}/key.pem"
+    owner=ssl-cert
+    group=ssl-cert
+    state=touch
+    mode=0600
+
+- name: set up cron job to renew certificate
+  cron:
+    name="{{ ssl_domain }}-renew-cert"
+    user="ssl-cert"
+    hour=0
+    minute=0
+    job="cd /etc/ssl/lets-encrypt/{{ ssl_domain }} && simp_le -d {{ ssl_domain }}:/var/www/acme-challenge/{{ ssl_domain }} -f account_key.json -f key.pem -f cert.pem -f chain.pem --server {{ lets_encrypt_server }} {% if on_renew %}&& {{ on_renew }}{% endif %}"

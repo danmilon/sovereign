@@ -1,0 +1,9 @@
+<VirtualHost *:80>
+    ServerName {{ ssl_domain }}
+
+    DocumentRoot /var/www/acme-challenge/{{ ssl_domain }}
+
+    RewriteEngine on
+    # TODO: fix regex here or $1 it doesnt work properly
+    RewriteRule !^/.well-known/acme-challenge/.* https://%{SERVER_NAME}/$1 [R,L]
+</VirtualHost>

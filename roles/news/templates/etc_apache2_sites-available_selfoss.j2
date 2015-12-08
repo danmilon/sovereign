@@ -1,13 +1,10 @@
-<VirtualHost *:80>
-    ServerName {{ selfoss_domain }}
-
-    Redirect permanent / https://{{ selfoss_domain }}/
-</VirtualHost>
-
 <VirtualHost *:443>
     ServerName {{ selfoss_domain }}
 
     Include /etc/apache2/ssl.conf
+    SSLCertificateKeyFile /etc/ssl/lets-encrypt/{{ selfoss_domain }}/key.pem
+    SSLCertificateFile /etc/ssl/lets-encrypt/{{ selfoss_domain }}/cert.pem
+    SSLCertificateChainFile /etc/ssl/lets-encrypt/{{ selfoss_domain }}/chain.pem
 
     DocumentRoot            /var/www/selfoss
     Options                 -Indexes
